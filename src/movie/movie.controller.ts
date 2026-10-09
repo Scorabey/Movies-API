@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseInterceptors,
 } from "@nestjs/common";
 import { MovieService } from "./movie.service";
 import type MovieInt from "./interface/movie.interface";
@@ -16,11 +17,13 @@ import { ZodValidationPipe } from "../common/pipes/zod-validation.pipe";
 import { createMovieSchema, type CreateMovieDto } from "./dto/createMovieDto";
 import { queryMovieSchema, type QueryMovieDto } from "./dto/QueryMovieDto";
 import type { CategoryInt } from "./category/interface/category.interface";
+import { HateoasIntercaptor } from "../common/hateoas/hateoas.intercaptor";
 @Controller("movie")
 export class MovieController {
   constructor(@Inject(MovieService) private readonly service: MovieService) {}
 
   @Get()
+  @UseInterceptors(HateoasIntercaptor)
   async getAll(
     @Query(new ZodValidationPipe(queryMovieSchema)) query: QueryMovieDto
   ): Promise<MovieInt[]> {
@@ -35,11 +38,13 @@ export class MovieController {
   }
 
   @Get(":id")
+  @UseInterceptors(HateoasIntercaptor)
   async getById(@Param("id", ParseIntPipe) id: number): Promise<MovieInt> {
     return await this.service.getById(id);
   }
 
   @Post()
+  @UseInterceptors(HateoasIntercaptor)
   async create(
     @Body(new ZodValidationPipe(createMovieSchema)) dto: CreateMovieDto,
   ) {
@@ -47,6 +52,7 @@ export class MovieController {
   }
 
   @Put(":id")
+  @UseInterceptors(HateoasIntercaptor)
   async update(
     @Body(new ZodValidationPipe(createMovieSchema)) dto: CreateMovieDto,
     @Param("id", ParseIntPipe) id: number,
