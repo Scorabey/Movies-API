@@ -4,12 +4,16 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
-    "Post": {
-      "model": "Post",
+    "Category": {
+      "model": "Category",
       "namespace": "public"
     },
-    "User": {
-      "model": "User",
+    "Movie": {
+      "model": "Movie",
+      "namespace": "public"
+    },
+    "MovieCategory": {
+      "model": "MovieCategory",
       "namespace": "public"
     }
   },
@@ -17,26 +21,43 @@
     "namespaces": {
       "public": {
         "models": {
-          "Post": {
+          "Category": {
             "fields": {
-              "authorId": {
+              "id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
-              "content": {
-                "nullable": true,
+              "name": {
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                }
               },
-              "createdAt": {
+              "namespaceId": "public",
+              "table": "Category"
+            }
+          },
+          "Movie": {
+            "fields": {
+              "description": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/timestamptz-string@1",
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -44,6 +65,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "img": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -53,143 +81,119 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
-              },
-              "updatedAt": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "kind": "scalar"
-                }
               }
             },
             "relations": {
-              "author": {
-                "cardinality": "N:1",
-                "nullable": false,
+              "categories": {
+                "cardinality": "N:M",
                 "on": {
                   "localFields": [
-                    "authorId"
+                    "id"
                   ],
                   "targetFields": [
+                    "movieId"
+                  ]
+                },
+                "through": {
+                  "childColumns": [
+                    "categoryId"
+                  ],
+                  "namespaceId": "public",
+                  "parentColumns": [
+                    "movieId"
+                  ],
+                  "table": "MovieCategory",
+                  "targetColumns": [
                     "id"
                   ]
                 },
                 "to": {
-                  "model": "User",
+                  "model": "Category",
                   "namespace": "public"
                 }
               }
             },
             "storage": {
               "fields": {
-                "authorId": {
-                  "column": "authorId"
-                },
-                "content": {
-                  "column": "content"
-                },
-                "createdAt": {
-                  "column": "createdAt"
+                "description": {
+                  "column": "description"
                 },
                 "id": {
                   "column": "id"
                 },
+                "img": {
+                  "column": "img"
+                },
                 "title": {
                   "column": "title"
-                },
-                "updatedAt": {
-                  "column": "updatedAt"
                 }
               },
               "namespaceId": "public",
-              "table": "Post"
+              "table": "Movie"
             }
           },
-          "User": {
+          "MovieCategory": {
             "fields": {
-              "createdAt": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "kind": "scalar"
-                }
-              },
-              "email": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "id": {
+              "categoryId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
-              "name": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "updatedAt": {
+              "movieId": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "kind": "scalar"
-                }
-              },
-              "username": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               }
             },
             "relations": {
-              "posts": {
-                "cardinality": "1:N",
+              "category": {
+                "cardinality": "N:1",
+                "nullable": false,
                 "on": {
                   "localFields": [
-                    "id"
+                    "categoryId"
                   ],
                   "targetFields": [
-                    "authorId"
+                    "id"
                   ]
                 },
                 "to": {
-                  "model": "Post",
+                  "model": "Category",
+                  "namespace": "public"
+                }
+              },
+              "movie": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "movieId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Movie",
                   "namespace": "public"
                 }
               }
             },
             "storage": {
               "fields": {
-                "createdAt": {
-                  "column": "createdAt"
+                "categoryId": {
+                  "column": "categoryId"
                 },
-                "email": {
-                  "column": "email"
-                },
-                "id": {
-                  "column": "id"
-                },
-                "name": {
-                  "column": "name"
-                },
-                "updatedAt": {
-                  "column": "updatedAt"
-                },
-                "username": {
-                  "column": "username"
+                "movieId": {
+                  "column": "movieId"
                 }
               },
               "namespaceId": "public",
-              "table": "User"
+              "table": "MovieCategory"
             }
           }
         }
@@ -201,98 +205,8 @@
       "public": {
         "entries": {
           "table": {
-            "Post": {
+            "Category": {
               "columns": {
-                "authorId": {
-                  "codecId": "pg/int4@1",
-                  "nativeType": "int4",
-                  "nullable": false
-                },
-                "content": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
-                },
-                "createdAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "default": {
-                    "expression": "now()",
-                    "kind": "function"
-                  },
-                  "nativeType": "timestamptz",
-                  "nullable": false
-                },
-                "id": {
-                  "codecId": "pg/int4@1",
-                  "default": {
-                    "expression": "autoincrement()",
-                    "kind": "function"
-                  },
-                  "nativeType": "int4",
-                  "nullable": false
-                },
-                "title": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "updatedAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "nativeType": "timestamptz",
-                  "nullable": false
-                }
-              },
-              "foreignKeys": [
-                {
-                  "source": {
-                    "columns": [
-                      "authorId"
-                    ],
-                    "namespaceId": "public",
-                    "tableName": "Post"
-                  },
-                  "target": {
-                    "columns": [
-                      "id"
-                    ],
-                    "namespaceId": "public",
-                    "tableName": "User"
-                  }
-                }
-              ],
-              "indexes": [
-                {
-                  "columns": [
-                    "authorId"
-                  ],
-                  "name": "Post_authorId_idx_e47547ed",
-                  "prefix": "Post_authorId_idx",
-                  "unique": false
-                }
-              ],
-              "primaryKey": {
-                "columns": [
-                  "id"
-                ]
-              },
-              "uniques": []
-            },
-            "User": {
-              "columns": {
-                "createdAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "default": {
-                    "expression": "now()",
-                    "kind": "function"
-                  },
-                  "nativeType": "timestamptz",
-                  "nullable": false
-                },
-                "email": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "default": {
@@ -305,17 +219,7 @@
                 "name": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
-                  "nullable": true
-                },
-                "updatedAt": {
-                  "codecId": "pg/timestamptz-string@1",
-                  "nativeType": "timestamptz",
                   "nullable": false
-                },
-                "username": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
                 }
               },
               "foreignKeys": [],
@@ -328,10 +232,119 @@
               "uniques": [
                 {
                   "columns": [
-                    "email"
+                    "name"
                   ]
                 }
               ]
+            },
+            "Movie": {
+              "columns": {
+                "description": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "img": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "title": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "MovieCategory": {
+              "columns": {
+                "categoryId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "movieId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "movieId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "MovieCategory"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Movie"
+                  }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "categoryId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "MovieCategory"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Category"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "categoryId"
+                  ],
+                  "name": "MovieCategory_categoryId_idx_15c304f2",
+                  "prefix": "MovieCategory_categoryId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "movieId"
+                  ],
+                  "name": "MovieCategory_movieId_idx_8cb9f9db",
+                  "prefix": "MovieCategory_movieId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "movieId",
+                  "categoryId"
+                ]
+              },
+              "uniques": []
             }
           }
         },
@@ -339,44 +352,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "91e7f9f035806fa2789a4d726ef7724cad434fd6b00014d47ebf12d6e6bb784e"
-  },
-  "execution": {
-    "executionHash": "796fa270d853489edb1c3e0d332d596412292127a259b856b495a498c752882a",
-    "mutations": {
-      "defaults": [
-        {
-          "onCreate": {
-            "id": "timestampNow",
-            "kind": "generator"
-          },
-          "onUpdate": {
-            "id": "timestampNow",
-            "kind": "generator"
-          },
-          "ref": {
-            "column": "updatedAt",
-            "namespace": "public",
-            "table": "Post"
-          }
-        },
-        {
-          "onCreate": {
-            "id": "timestampNow",
-            "kind": "generator"
-          },
-          "onUpdate": {
-            "id": "timestampNow",
-            "kind": "generator"
-          },
-          "ref": {
-            "column": "updatedAt",
-            "namespace": "public",
-            "table": "User"
-          }
-        }
-      ]
-    }
+    "storageHash": "0071454fd575cee5dfd12df11242134d4bdcad93f8934554cb65421ca36c2313"
   },
   "capabilities": {
     "postgres": {
