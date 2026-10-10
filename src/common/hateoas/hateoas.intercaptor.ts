@@ -3,10 +3,20 @@ import type { Observable } from "rxjs";
 import { map } from "rxjs/operators"
 import type { Request } from 'express'
 import type MovieInt from "../../movie/interface/movie.interface";
+import type CollectionData from "../types/global.interface";
+
+function isCollection<T>(value: unknown): value is CollectionData<T> {
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        'data' in value &&
+        Array.isArray((value as { data: unknown }).data)
+    )
+}
 
 @Injectable()
 export class HateoasIntercaptor implements NestInterceptor {
-    intercept(context: ExecutionContext, next: CallHandler<MovieInt[]>): Observable<any> {
+    intercept(context: ExecutionContext, next: CallHandler<CollectionData<MovieInt>>): Observable<any> {
         const request = context.switchToHttp().getRequest<Request>()
         const host = `${request.protocol}://${request.get('host')}`
 
@@ -17,8 +27,6 @@ export class HateoasIntercaptor implements NestInterceptor {
             : path;
 
         const collectionUrl = `${host}${collectionPath}`
-
-        console.log(path)
 
         const addLink = (movie: MovieInt) => ({
             ...movie,
@@ -31,7 +39,30 @@ export class HateoasIntercaptor implements NestInterceptor {
         })
 
         return next.handle().pipe(
-            map((data) => (Array.isArray(data) ? data.map(addLink) : addLink(data)))
+            map((res) => {
+                if(Array.isArray(res)) {
+                    return res.map(addLink)
+                }
+
+                if(isCollection<MovieInt>(res)) {
+                    const { page, limit, prev, next } = res.meta
+                    
+                    return {
+                        ...res,
+                        data: res.data.map(addLink),
+                        meta: {
+                            ...res.meta,
+                            _links: {
+                                self: { href: `${collectionUrl}?page=${page}&limit=${limit}`, method: "GET" },
+                                next: { href: `${collectionUrl}?page=${next}&limit=${limit}`, method: "GET" },
+                                prev: { href: `${collectionUrl}?page=${prev}&limit=${limit}`, method: "GET" },
+                            }
+                        }
+                    }
+                }
+
+                return addLink(res)
+            })
         )
     }
 }

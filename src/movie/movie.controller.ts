@@ -18,6 +18,7 @@ import { createMovieSchema, type CreateMovieDto } from "./dto/createMovieDto";
 import { queryMovieSchema, type QueryMovieDto } from "./dto/QueryMovieDto";
 import type { CategoryInt } from "./category/interface/category.interface";
 import { HateoasIntercaptor } from "../common/hateoas/hateoas.intercaptor";
+import type CollectionData from "../common/types/global.interface";
 @Controller("movie")
 export class MovieController {
   constructor(@Inject(MovieService) private readonly service: MovieService) {}
@@ -26,7 +27,7 @@ export class MovieController {
   @UseInterceptors(HateoasIntercaptor)
   async getAll(
     @Query(new ZodValidationPipe(queryMovieSchema)) query: QueryMovieDto
-  ): Promise<MovieInt[]> {
+  ): Promise<CollectionData<MovieInt>> {
     return await this.service.getAll(query);
   }
 

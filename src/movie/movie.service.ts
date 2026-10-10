@@ -4,12 +4,13 @@ import type MovieInt from "./interface/movie.interface";
 import type { CreateMovieDto } from "./dto/createMovieDto";
 import type { QueryMovieDto } from "./dto/QueryMovieDto";
 import type { CategoryInt } from "./category/interface/category.interface";
+import type CollectionData from "../common/types/global.interface";
 
 @Injectable()
 export class MovieService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async getAll(query: QueryMovieDto): Promise<MovieInt[]> {
+  async getAll(query: QueryMovieDto): Promise<CollectionData<MovieInt>> {
     const { limit, orderBy, page, sortBy, search, filterBy } = query;
 
     let base = this.prisma.db.orm.public.Movie.select(
@@ -33,7 +34,9 @@ export class MovieService {
       }
     }
 
-    return await base
+    const total = (await base.select("id").all()).length
+
+    const finnal = await base
       .orderBy((order) =>
         orderBy === "asc" ? order[sortBy].asc() : order[sortBy].desc(),
       )
@@ -41,6 +44,23 @@ export class MovieService {
       .offset(page)
       .include("categories")
       .all();
+
+    const totalPages = Math.ceil(total / limit)
+
+    return {
+      data: finnal,
+      meta: {
+        total,
+        limit,
+        page,
+        totalPages,
+        prev: page > 0 ? page - 1 : null,
+        self: page,
+        next: page < totalPages - 1 ? page + 1 : null,
+        hasPrev: page > 0,
+        hasNext: page < totalPages - 1
+      }
+    } 
   }
 
   async getMovieCategories(id: number): Promise<CategoryInt[]> {
