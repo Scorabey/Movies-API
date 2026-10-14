@@ -148,17 +148,21 @@ export class MovieService {
   }
 
   async delete(id: number): Promise<MovieInt> {
-    const movie = await this.prisma.db.orm.public.Movie.select(
-      "id",
-      "title",
-      "description",
-      "img",
-    )
-      .where({ id })
-      .delete();
+    return this.prisma.db.transaction(async () => {
+      await this.prisma.db.orm.public.MovieCategory.where({ movieId: id }).delete()
 
-    if (!movie) throw new NotFoundException(`movie with id: ${id} not found`);
+      const movie = await this.prisma.db.orm.public.Movie.select(
+        "id",
+        "title",
+        "description",
+        "img",
+      )
+        .where({ id })
+        .delete();
 
-    return movie;
+      if (!movie) throw new NotFoundException(`movie with id: ${id} not found`);
+
+      return movie;
+    })
   }
 }

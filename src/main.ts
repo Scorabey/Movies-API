@@ -7,10 +7,16 @@ import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: ["http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+  })
   const rawPort = (process.env.PORT ?? "").trim();
   const parsedPort = rawPort.length > 0 ? Number(rawPort) : Number.NaN;
   const port =
-    Number.isFinite(parsedPort) && parsedPort >= 0 && parsedPort <= 65535 ? parsedPort : 3000;
+    Number.isFinite(parsedPort) && parsedPort >= 0 && parsedPort <= 65535 ? parsedPort : 5000;
   await app.listen(port);
   console.log(`Server running at http://localhost:${port}`);
 }
